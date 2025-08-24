@@ -9,7 +9,7 @@ dotenv.config()
 connectDb();
 const app = express()
 app.use(cors({
-  origin: ["http://localhost:3000", "https://reactproject-lemon-seven.vercel.app/login"],
+  origin: ["http://localhost:3000", "https://reactproject-lemon-seven.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
