@@ -21,7 +21,4 @@ app.use('/api/v1/user', require("./routes/userRoutes"))
 app.get('/', (req, res) => {
   return res.send('Hello World!')
 })
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+module.exports = app;
