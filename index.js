@@ -15,7 +15,7 @@ app.use(cors({
 }));
 const port = process.env.PORT
 app.use(express.json());
-app.use('/api/v1/test', require("./routes/TestRoutes"))
+app.use('/api/v1/test', require("./routes/testRoutes"))
 app.use('/api/v1/auth', require("./routes/authRoutes"))
 app.use('/api/v1/user', require("./routes/userRoutes"))
 app.get('/', (req, res) => {
