@@ -9,7 +9,7 @@ dotenv.config()
 connectDb();
 const app = express()
 app.use(cors({
-  origin: ["http://localhost:5173", "https://reactproject-lemon-seven.vercel.app"],
+  origin: ["http://localhost:5173", "https://first-project-pi-orpin.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   
 }));
