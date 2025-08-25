@@ -11,7 +11,7 @@ const app = express()
 app.use(cors({
   origin: ["http://localhost:5173", "https://reactproject-lemon-seven.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  
 }));
 const port = process.env.PORT
 app.use(express.json());
