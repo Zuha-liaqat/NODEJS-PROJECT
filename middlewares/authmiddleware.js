@@ -1,28 +1,25 @@
-const JWT = require("jsonwebtoken")
+const JWT = require("jsonwebtoken");
 
-module.exports = async (req,res,next) => {
-try {
-    const token = req.headers["authorization"].split(" ")[1]
-    JWT.verify(token,process.env.JWT_SECRET,(err,decode)=>{
-      if(err){
-       return  res.status(401).send({
-         success:false,
-         message:"Un-Authorize User"
-       });
-      }
-      else {
-        req.user = decode; 
-       
-        next();
-      }
-    })
-   
-} catch (error) {
-    res.status(500).send({
-        success:false,
-        message:"Error in auth api",
-        error
-    })
-}
-}
+const authmiddleware = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).send({
+        success: false,
+        message: "No token provided"
+      });
+    }
 
+    const token = authHeader.split(" ")[1]; // "Bearer <token>" me se sirf token nikalna
+    const decoded = JWT.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;  // user ka data (id, role) yahan save ho jata hai
+    next();
+  } catch (error) {
+    return res.status(401).send({
+      success: false,
+      message: "Invalid Token"
+    });
+  }
+};
+
+module.exports = authmiddleware;
