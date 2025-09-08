@@ -1,5 +1,5 @@
 const foodModels = require("../models/foodModels");
-
+const sendEmail = require("../utils/sendEmail");
 const orderModels = require("../models/orderModels");
 
 const foodController = async (req, res) => {
@@ -44,19 +44,23 @@ const foodController = async (req, res) => {
 
 const getfoodController = async (req, res) => {
   try {
-    // query params se page aur limit nikal lo
-    const page = parseInt(req.query.page) || 1;   
-    const limit = parseInt(req.query.limit) || 5; 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // total documents count
-    const totalCount = await foodModels.countDocuments();
+  
+    const search = req.query.search ? {
+      title: { $regex: req.query.search, $options: "i" }
+    } : {};
 
-    // sirf required records fetch karo
-    const food = await foodModels.find({})
+  
+    const totalCount = await foodModels.countDocuments(search);
+
+   
+    const food = await foodModels.find(search)
       .skip(skip)
       .limit(limit);
-
+   console.log("Search Result:", food);
     if (!food || food.length === 0) {
       return res.status(404).send({
         success: false,
@@ -81,6 +85,8 @@ const getfoodController = async (req, res) => {
     });
   }
 };
+
+
 
 
 const getbyIDfoodController = async (req,res)=>{
@@ -155,35 +161,49 @@ const updatebyIDController = async (req,res)=>{
  }
 }
 
+
+
 const placeorderController = async (req, res) => {
   try {
-    const { cart, payment, id } = req.body;
+    console.log("🟢 Inside placeorderController");
+    const { cart, id, email } = req.body;
 
-    if (!cart || !payment) {
+    if (!cart || cart.length === 0 || !email) {
       return res.status(400).send({
         success: false,
-        message: "Food cart or payment missing",
+        message: "Food cart or email missing",
       });
     }
 
-    // Total price calculate with quantity
+    // Total price calculate by fetching from DB
     let total = 0;
-    cart.forEach((item) => {
-      total += item.price;
-    });
+    for (let foodId of cart) {
+      const food = await foodModels.findById(foodId);
+      if (food) {
+        total += food.price; // ✅ DB se price uthao
+      }
+    }
 
     // Save order
     const newOrder = new orderModels({
-      foods: cart,
+      foods: cart,   // sirf IDs store hongi
       payment: total,
-      buyer: id, // frontend se bheja hua userId
+      buyer: id,
     });
 
     await newOrder.save();
 
+    // Send email
+    await sendEmail(
+      email,
+      "Order Confirmation",
+      `Thank you for your order!\n\nOrder ID: ${newOrder._id}\nTotal: $${total}\n\nWe will deliver soon.`
+    );
+
+    console.log("✅ Order placed and email sent");
     res.status(201).send({
       success: true,
-      message: "Order placed successfully",
+      message: "Order placed successfully & email sent",
       order: newOrder,
     });
   } catch (error) {
@@ -194,6 +214,8 @@ const placeorderController = async (req, res) => {
     });
   }
 };
+
+
 
 
 module.exports = {foodController,getfoodController,getbyIDfoodController,placeorderController,deletebyIDfoodController,updatebyIDController}

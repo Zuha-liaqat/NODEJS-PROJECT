@@ -74,16 +74,27 @@ try {
             message:"Invalid Credentials"
         })
     }
-    const token = JWT.sign(
-  { id: user._id, role: user.role },  
+   
+const accessToken = JWT.sign(
+  { id: user._id, role: user.role },
   process.env.JWT_SECRET,
-  { expiresIn: "7d" }
+  { expiresIn: "2d" }  
 );
+
+
+const refreshToken = JWT.sign(
+  { id: user._id },
+  process.env.JWT_REFRESH_SECRET,
+  { expiresIn: "7d" }   
+);
+
     res.status(200).send({
         success:true,
         message:"Login Successfully",
-        token,
+       
         user,
+        accessToken,
+        refreshToken
     })
 } catch (error) {
     console.log(error)
@@ -94,5 +105,39 @@ try {
     })
 }
 }
+const refreshTokenController = async (req, res) => {
+  try {
+    const { token } = req.body; 
+    if (!token) {
+      return res.status(401).send({ success: false, message: "No refresh token provided" });
+    }
 
-module.exports = {authcontroller,logincontroller}
+    // verify karo refresh token
+    JWT.verify(token, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(403).send({ success: false, message: "Invalid refresh token" });
+      }
+
+      // naya access token generate karo
+      const newAccessToken = JWT.sign(
+        { id: decoded.id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: "15m" }
+      );
+
+      res.status(200).send({
+        success: true,
+        accessToken: newAccessToken,
+      });
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+
+
+module.exports = {authcontroller,logincontroller,refreshTokenController}
