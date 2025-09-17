@@ -4,39 +4,29 @@ const orderModels = require("../models/orderModels");
 
 const foodController = async (req, res) => {
   try {
-    const { title, imageurl, price, rating, description } = req.body;
+    const { title, price, rating, description } = req.body;
+    const image = req.file ? req.file.filename : null; // multer se file milti hai
 
-    if (!title || !price ) {
-      return res.status(400).send({
-        success: false,
-        message: "Please provide all required fields (title, price)"
-      });
-    }
-
-    // Create new food
-    const food = new foodModels({
+    const newFood = new foodModels({
       title,
-      imageurl,
       price,
       rating,
       description,
-     
+      image,
     });
 
-    await food.save();
-
-   
+    await newFood.save();
 
     res.status(201).send({
       success: true,
       message: "Food created successfully",
-      food
+      food: newFood,
     });
   } catch (error) {
     res.status(500).send({
       success: false,
       message: "Error in creating food",
-      error: error.message
+      error: error.message,
     });
   }
 };
