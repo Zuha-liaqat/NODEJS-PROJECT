@@ -155,10 +155,11 @@ const deleteuserbyIDcontroller = async (req, res) => {
 };
 
 
+
 const addToWishlistcontroller = async (req, res) => {
   try {
-    const userId = req.user.id; // JWT se
-    const productId = req.params.id; // ✅ params se lo
+    const userId = req.user.id; 
+    const productId = req.params.id; 
 
     const user = await userModels.findById(userId);
     if (!user) return res.status(404).send({ success: false, message: "User not found" });
@@ -169,6 +170,9 @@ const addToWishlistcontroller = async (req, res) => {
 
     user.wishlist.push(productId);
     await user.save();
+
+   
+    await user.populate("wishlist");
 
     res.status(200).send({
       success: true,
@@ -184,16 +188,20 @@ const addToWishlistcontroller = async (req, res) => {
   }
 };
 
+
 const removeFromWishlist = async (req, res) => {
   try {
     const userId = req.user.id;
-    const productId = req.params.id; // ✅ params se lo
+    const productId = req.params.id;
 
     const user = await userModels.findById(userId);
     if (!user) return res.status(404).send({ success: false, message: "User not found" });
 
     user.wishlist = user.wishlist.filter((id) => id.toString() !== productId);
     await user.save();
+
+    
+    await user.populate("wishlist");
 
     res.status(200).send({
       success: true,
@@ -209,13 +217,17 @@ const removeFromWishlist = async (req, res) => {
   }
 };
 
+
 const getWishlist = async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await userModels.findById(userId).populate("wishlist");
     if (!user) return res.status(404).send({ success: false, message: "User not found" });
 
-    res.status(200).send({ success: true, items: user.wishlist });
+    res.status(200).send({
+      success: true,
+      items: user.wishlist, 
+    });
   } catch (error) {
     res.status(500).send({
       success: false,
@@ -224,6 +236,9 @@ const getWishlist = async (req, res) => {
     });
   }
 };
+
+module.exports = { addToWishlistcontroller, removeFromWishlist, getWishlist };
+
 
 
 
