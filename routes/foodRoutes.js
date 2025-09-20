@@ -1,9 +1,8 @@
 const express = require("express");
 const authmiddleware = require("../middlewares/authmiddleware");
 const rolemiddleware = require("../middlewares/rolemiddleware");
+const upload = require("../middlewares/multer");
 
-const multer = require("multer");
-const path = require("path");
 
 const { 
   foodController, 
@@ -14,17 +13,8 @@ const {
   deletebyIDfoodController 
 } = require("../controllers/foodController");
 
-// Multer storage setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads")); // uploads folder ka path
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
 
-const upload = multer({ storage });
+
 
 const router = express.Router();
 

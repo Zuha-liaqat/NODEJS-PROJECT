@@ -4,15 +4,15 @@ const orderModels = require("../models/orderModels");
 
 const foodController = async (req, res) => {
   try {
-    const { title, price, rating, description } = req.body;
-    const image = req.file ? req.file.filename : null; // multer se file milti hai
+    const { title, price, rating, description} = req.body;
+    
 
     const newFood = new foodModels({
       title,
       price,
       rating,
       description,
-      image,
+      imageurl: req.file ? req.file.path : null, 
     });
 
     await newFood.save();
